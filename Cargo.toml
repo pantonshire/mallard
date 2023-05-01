@@ -1,0 +1,15 @@
+[package]
+name = "mallard"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+axum = "0.6.18"
+hyper = { version = "0.14.26" }
+notify = "5.1.0"
+tera = "1.18.1"
+tokio = { version = "1.28.0", features = ["full"] }
+tracing = "0.1.37"
+treacle = { git = "https://github.com/pantonshire/treacle.git" }
