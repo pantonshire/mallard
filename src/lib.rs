@@ -8,16 +8,18 @@ use std::{
     task::{Context, Poll},
     sync::Arc,
     thread::{JoinHandle, self},
+    net::SocketAddr,
     io,
     fmt,
     error,
-    panic, net::SocketAddr,
+    panic,
 };
 
 use axum::{Router, Server, Extension};
 use notify::{RecommendedWatcher, RecursiveMode, Watcher};
 use tera::Tera;
 use tokio::sync::RwLock as TokioRwLock;
+use tracing::{debug, info, error};
 use treacle::Debouncer;
 
 const DEFAULT_TEMPLATES_DEBOUNCE_TIME: Duration = Duration::from_millis(500);
@@ -104,7 +106,7 @@ impl<'a, F> Mallard<'a, F> {
                         },
                         Err(err) => {
                             // FIXME: custom error handler
-                            eprintln!("Filesystem event error: {}", err);
+                            error!(error = %err, "filesystem event error");
                         },
                     })?;
 
@@ -118,25 +120,25 @@ impl<'a, F> Mallard<'a, F> {
 
                     move || {
                         while let Ok(()) = debounced_rx.recv() {
-                            // FIXME: tracing
+                            debug!("reloading templates");
 
                             let reload_res = {
                                 let mut guard = ctx.tera().blocking_write();
                                 guard.full_reload()
                             };
 
-                            // FIXME: custom error handler
                             match reload_res {
                                 Ok(()) => {
-                                    // println!("Reloaded templates");
+                                    info!("reloaded templates");
                                 },
-                                Err(_) => {
-                                    // eprintln!("Error reloading templates: {}", err);
+                                Err(err) => {
+                                    // FIXME: custom error handler
+                                    error!(error = %err, "failed to reload templates");
                                 },
                             }
                         }
             
-                        // println!("Stopping template reloader thread");
+                        info!("stopped template reloader thread")
                     }
                 })?;
 
