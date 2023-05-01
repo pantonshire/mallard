@@ -235,7 +235,7 @@ impl Drop for ReloadEngine {
     }
 }
 
-struct BottomFuture<T> {
+pub struct BottomFuture<T> {
     bottom: Infallible,
     phantom_data: PhantomData<T>,
 }
